@@ -6,7 +6,7 @@ import datetime
 
 
 clocks = Main()
-clocks.wm_title("Timeclocks")
+clocks.wm_title("Timeclocks  (Ctrl+S to export time as .txt)")
 clocks.iconbitmap(file_path('clock.ico'))
 
 font = ("arial", 9)
@@ -14,12 +14,13 @@ timefont = ("arial", 14)
 headerfont = ("arial", 12, 'bold')
 headerfont2 = ("arial", 10, 'bold')
 today = datetime.datetime.now().strftime("%m-%d-%Y")
+# 0 - Synchronous, 1 - Asynchronous
+MODE = 0
 
+set_theme("light")
 
-set_theme("yellow")
-
-
-def export_time():
+def export_time(event=None):
+    print(event)
     if clock1.timelabel.cget('text') == '00:00:00':
         row1 = ''
     else:
@@ -54,6 +55,8 @@ def export_time():
     if filename:
         my_file = open(filename, "w")
         my_file.write(data)
+    else:
+        return
 
 
 # Sets the background to the hover color when mouse is over btn. Doesn't work for disabled buttons.
@@ -75,7 +78,7 @@ class StopWatch(Frame):
         Frame.__init__(self, parent)
         self._start = 0.0
         self._elapsedtime = 0.0
-        self._running = 0
+        self.running = 0
         self.timestr = StringVar()
         self.makewidgets()
 
@@ -115,24 +118,25 @@ class StopWatch(Frame):
 
     def start(self):
         """ Start the stopwatch, ignore if running. """
-        clock1.stop()
-        clock2.stop()
-        clock3.stop()
-        clock4.stop()
-        clock5.stop()
-        clock6.stop()
-        if not self._running:
+        if MODE == 0:
+            clock1.stop()
+            clock2.stop()
+            clock3.stop()
+            clock4.stop()
+            clock5.stop()
+            clock6.stop()
+        if not self.running:
             self._start = time.time() - self._elapsedtime
             self._update()
-            self._running = 1
+            self.running = 1
 
     def stop(self):
         """ Stop the stopwatch, ignore if stopped. """
-        if self._running:
+        if self.running:
             self.after_cancel(self._timer)
             self._elapsedtime = time.time() - self._start
             self._settime(self._elapsedtime)
-            self._running = 0
+            self.running = 0
 
 
 def cat_popup(label):
@@ -154,32 +158,63 @@ def cat_popup(label):
     cat_entry.focus()
 
 
+def toggle_mode():
+    global MODE
+    MODE = not MODE
+    if MODE == 0:
+        running_count = 0
+        if clock1.running:
+            running_count += 1
+        if clock2.running:
+            running_count += 1
+        if clock3.running:
+            running_count += 1
+        if clock4.running:
+            running_count += 1
+        if clock5.running:
+            running_count += 1
+        if clock6.running:
+            running_count += 1
+        if running_count > 1:
+            clock1.stop()
+            clock2.stop()
+            clock3.stop()
+            clock4.stop()
+            clock5.stop()
+            clock6.stop()
+
+        mode_btn.configure(text="Mode: Synchronous")
+    else:
+        mode_btn.configure(text="Mode: Asynchronous")
+
+
+mode_btn = Button(clocks, text='Mode: Synchronous', width=20, font=headerfont2, command=toggle_mode)
+
 clock1 = StopWatch(clocks)
-change_cat(clock1.clock_label, "Programming")
+change_cat(clock1.clock_label, "JIRA Issue 1")
 
 clock2 = StopWatch(clocks)
-change_cat(clock2.clock_label, "Meetings")
+change_cat(clock2.clock_label, "JIRA Issue 2")
 
 clock3 = StopWatch(clocks)
-change_cat(clock3.clock_label, "Casework")
+change_cat(clock3.clock_label, "Other")
 
 clock4 = StopWatch(clocks)
-change_cat(clock4.clock_label, "Support Help")
+change_cat(clock4.clock_label, "Support Escalation")
 
 clock5 = StopWatch(clocks)
-change_cat(clock5.clock_label, "Sales Help")
+change_cat(clock5.clock_label, "Testing")
 
 clock6 = StopWatch(clocks)
-change_cat(clock6.clock_label, "Other")
+change_cat(clock6.clock_label, "Regression")
 
-exportbtn = Button(clocks, text="Export Time", command=export_time, width=20, font=headerfont2)
+clock1.grid(row=1, column=0)
+clock2.grid(row=1, column=1)
+clock3.grid(row=1, column=2)
+clock4.grid(row=2, column=0)
+clock5.grid(row=2, column=1)
+clock6.grid(row=2, column=2)
+mode_btn.grid(row=0, columnspan=3)
 
-
-clock1.grid(row=0, column=0)
-clock2.grid(row=0, column=1)
-clock3.grid(row=0, column=2)
-clock4.grid(row=1, column=0)
-clock5.grid(row=1, column=1)
-clock6.grid(row=1, column=2)
-exportbtn.grid(row=2, columnspan=3, pady=5)
+clocks.bind('<Control-s>', export_time)
 clocks.mainloop()

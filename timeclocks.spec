@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['timeclocks.py'],
-             pathex=['C:\\Users\\kevin.lusignolo\\PycharmProjects\\timeclocks'],
+             pathex=['D:\\Repositories\\Python\\Timeclocks'],
              binaries=[],
-             datas=[('C:\\Users\\kevin.lusignolo\\PycharmProjects\\timeclocks\\clock.ico', '.')],
+             datas=[('D:\\Repositories\\Python\\Timeclocks\\clock.ico', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
