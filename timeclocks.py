@@ -84,16 +84,16 @@ class StopWatch(Frame):
 
         self.clock_label = Label(self, font=headerfont, text="Category")
         self.clock_label.grid(row=0, columnspan=2)
-        startbtn = Button(self, text='Start', font=headerfont2, width=10, command=lambda: StopWatch.start(self))
-        startbtn.grid(row=2, column=0, padx=5)
-        startbtn.configure(background='#e0ffe0')
-        startbtn.bind("<Enter>", lambda x: on_enter(startbtn, '#23e046'))
-        startbtn.bind("<Leave>", lambda x: on_leave(startbtn, '#e0ffe0'))
-        stopbtn = Button(self, text='Stop', font=headerfont2, width=10, command=lambda: StopWatch.stop(self))
-        stopbtn.grid(row=2, column=1, padx=5)
-        stopbtn.configure(background='#ffcccc')
-        stopbtn.bind("<Enter>", lambda x: on_enter(stopbtn, '#e81919'))
-        stopbtn.bind("<Leave>", lambda x: on_leave(stopbtn, '#ffcccc'))
+        self.startbtn = Button(self, text='Start', font=headerfont2, width=10, command=lambda: StopWatch.start(self))
+        self.startbtn.grid(row=2, column=0, padx=5)
+        self.startbtn.configure(background='#e0ffe0')
+        self.startbtn.bind("<Enter>", lambda x: on_enter(self.startbtn, '#23e046'))
+        self.startbtn.bind("<Leave>", lambda x: on_leave(self.startbtn, '#e0ffe0'))
+        self.stopbtn = Button(self, text='Reset', font=headerfont2, width=10, command=lambda: StopWatch.stop(self))
+        self.stopbtn.grid(row=2, column=1, padx=5)
+        self.stopbtn.configure(background='#ffcccc')
+        self.stopbtn.bind("<Enter>", lambda x: on_enter(self.stopbtn, '#e81919'))
+        self.stopbtn.bind("<Leave>", lambda x: on_leave(self.stopbtn, '#ffcccc'))
         Button(self, text='Rename Category', font=font,
                command=lambda: cat_popup(self.clock_label)).grid(row=3, columnspan=2, pady=5)
         self.timelabel = Label(self, font=timefont, textvariable=self.timestr)
@@ -129,6 +129,7 @@ class StopWatch(Frame):
             self._start = time.time() - self._elapsedtime
             self._update()
             self.running = 1
+            self.stopbtn.configure(text="Stop")
 
     def stop(self):
         """ Stop the stopwatch, ignore if stopped. """
@@ -137,6 +138,11 @@ class StopWatch(Frame):
             self._elapsedtime = time.time() - self._start
             self._settime(self._elapsedtime)
             self.running = 0
+            self.stopbtn.configure(text="Reset")
+        # Reset the time if
+        elif not self.running and self.stopbtn.cget('text') == "Reset":
+            self._elapsedtime = 0.0
+            self.makewidgets()
 
 
 def cat_popup(label):
@@ -197,7 +203,7 @@ clock2 = StopWatch(clocks)
 change_cat(clock2.clock_label, "JIRA Issue 2")
 
 clock3 = StopWatch(clocks)
-change_cat(clock3.clock_label, "Other")
+change_cat(clock3.clock_label, "Meetings")
 
 clock4 = StopWatch(clocks)
 change_cat(clock4.clock_label, "Support Escalation")
@@ -206,7 +212,7 @@ clock5 = StopWatch(clocks)
 change_cat(clock5.clock_label, "Testing")
 
 clock6 = StopWatch(clocks)
-change_cat(clock6.clock_label, "Regression")
+change_cat(clock6.clock_label, "Other")
 
 clock1.grid(row=1, column=0)
 clock2.grid(row=1, column=1)
