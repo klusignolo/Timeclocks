@@ -1,4 +1,3 @@
-from distutils.command.config import config
 import tkinter as tk
 from tkinter import StringVar
 from tkinter import filedialog
@@ -32,6 +31,8 @@ class MainFrame(tk.Frame):
         self.clock5 = StopWatch(self, main_frame=self)
         self.clock6 = StopWatch(self, main_frame=self)
 
+        self.all_clocks: list[StopWatch] = [self.clock1, self.clock2, self.clock3, self.clock4, self.clock5, self.clock6]
+
         self.clock1.grid(row=1, column=0)
         self.clock2.grid(row=1, column=1)
         self.clock3.grid(row=1, column=2)
@@ -57,46 +58,20 @@ class MainFrame(tk.Frame):
             self.mode = StopwatchOperationMode.SYNCHRONOUS
             
         if self.mode == StopwatchOperationMode.SYNCHRONOUS:
-            running_count = 0
-            if self.clock1.running:
-                running_count += 1
-            if self.clock2.running:
-                running_count += 1
-            if self.clock3.running:
-                running_count += 1
-            if self.clock4.running:
-                running_count += 1
-            if self.clock5.running:
-                running_count += 1
-            if self.clock6.running:
-                running_count += 1
-            if running_count > 1:
-                self.clock1.stop()
-                self.clock2.stop()
-                self.clock3.stop()
-                self.clock4.stop()
-                self.clock5.stop()
-                self.clock6.stop()
             update_widget_text(self.mode_btn, "Mode: Synchronous")
+            for clock in self.all_clocks:
+                if clock.is_running:
+                    self.stop_all_clocks()
         else:
             update_widget_text(self.mode_btn, "Mode: Asynchronous")
 
     def export_time(self, event=None):
-        print(event)
-        exportable_text = "\n".join([
-            self.clock1.get_exportable_text(),
-            self.clock2.get_exportable_text(),
-            self.clock3.get_exportable_text(),
-            self.clock4.get_exportable_text(),
-            self.clock5.get_exportable_text(),
-            self.clock5.get_exportable_text(),
-        ])
+        exportable_text = "\n".join([clock.get_exportable_text() for clock in self.all_clocks])
 
         filename = filedialog.asksaveasfilename(defaultextension=".txt", initialfile="Time Spent - " + TODAY_STRING,
                                                 filetypes=[('TXT Files', '.txt'), ('All Files', '.*')],
-                                                initialdir=os.getcwd() + '\\timecards')
+                                                initialdir=os.getcwd())
 
-        # This if statement makes sure that a file name has been specified. If not, no export is attempted.
         if filename:
             my_file = open(filename, "w")
             my_file.write(exportable_text)
@@ -104,12 +79,7 @@ class MainFrame(tk.Frame):
             return
         
     def stop_all_clocks(self):
-        self.clock1.stop()
-        self.clock2.stop()
-        self.clock3.stop()
-        self.clock4.stop()
-        self.clock5.stop()
-        self.clock6.stop()
+        [clock.stop() for clock in self.all_clocks]
 
     
 class StopWatch(tk.Frame):
@@ -118,12 +88,12 @@ class StopWatch(tk.Frame):
         self.main_frame = main_frame
         self._start = 0.0
         self._elapsedtime = 0.0
-        self.running = 0
-        self.timestr = StringVar()
-        self.update_time()
+        self.is_running = False
+        self.time_string_var = StringVar()
+        self.update_time_label()
 
         self.clock_label = tk.Label(self, font=FONT_HEADER1, text="Category")
-        self.timelabel = tk.Label(self, font=FONT_TIME, textvariable=self.timestr)
+        self.timelabel = tk.Label(self, font=FONT_TIME, textvariable=self.time_string_var)
         self.startbtn = tk.Button(self, text='Start', font=FONT_HEADER2, width=10, command=self.start)
         self.stopbtn = tk.Button(self, text='Reset', font=FONT_HEADER2, width=10, command=self.stop_btn_pressed)
         self.change_category_btn = tk.Button(self, text='Rename Category', font=FONT_PRIMARY,
@@ -139,7 +109,7 @@ class StopWatch(tk.Frame):
         self.stopbtn.grid(row=2, column=1, padx=5)
         self.change_category_btn.grid(row=3, columnspan=2, pady=5)
 
-    def update_time(self):
+    def update_time_label(self):
         """ Make the time label. """
         self._settime(self._elapsedtime)
 
@@ -150,29 +120,29 @@ class StopWatch(tk.Frame):
         self._timer = self.after(50, self._update)
 
     def _settime(self, elap):
-        """ Set the time string to Minutes:Seconds:Hundreths """
+        """ Set the time string to Hours:Minutes:Seconds """
         hours = int(elap / 3600)
         minutes = int(elap / 60 - hours * 60)
         seconds = int(elap - (hours * 3600 + minutes * 60))
-        self.timestr.set('%02d:%02d:%02d' % (hours, minutes, seconds))
+        self.time_string_var.set('%02d:%02d:%02d' % (hours, minutes, seconds))
 
     def start(self):
         """ Start the stopwatch, ignore if running. """
         if self.main_frame.mode == StopwatchOperationMode.SYNCHRONOUS:
             self.main_frame.stop_all_clocks()
-        if not self.running:
+        if not self.is_running:
             self._start = time.time() - self._elapsedtime
             self._update()
-            self.running = 1
+            self.is_running = True
             self.stopbtn.configure(text="Stop")
 
     def stop(self):
         """ Stop the stopwatch, ignore if stopped. """
-        if self.running:
+        if self.is_running:
             self.after_cancel(self._timer)
             self._elapsedtime = time.time() - self._start
             self._settime(self._elapsedtime)
-            self.running = 0
+            self.is_running = False
             self.stopbtn.configure(text="Reset")
 
     def reset(self):
