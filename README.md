@@ -1,6 +1,7 @@
 # Timeclocks
-A simple Python utility for timing a handful of processes. Example usage:
+A simple Python utility for timing a handful of processes.
 
+## Usage
 ![Timeclocks](https://i.ibb.co/W3LYwRQ/Timeclocks.gif)
 
 - Toggling Syncronous vs Asynchronous will allow/disallow the ability for all stopwatches to run in parallel.
