@@ -3,6 +3,10 @@ A simple Python utility for timing a handful of processes. Example usage:
 
 ![Timeclocks](https://i.ibb.co/W3LYwRQ/Timeclocks.gif)
 
+- Toggling Syncronous vs Asynchronous will allow/disallow the ability for all stopwatches to run in parallel.
+- The "Change Category" button will allow renaming of each stopwatch category.
+- Ctrl + S will allow for saving timed results into a .txt file.
+
 ## Building
 
 If you'd like to build the standalone executable, I've included the PyInstaller .spec file to accomplish that for you. To build a new .exe, open a command prompt window in the project directory and run the following:
